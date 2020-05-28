@@ -1,6 +1,7 @@
 import pygame
 from pygame import Vector2
 import math
+from pygame import gfxdraw
 
 DIAGONAL_CORRECTION = 0.7
 LEFT = pygame.K_a
@@ -8,13 +9,27 @@ UP = pygame.K_w
 RIGHT = pygame.K_d
 DOWN = pygame.K_s
 
+class Bullet():
+    def __init__(self, pos, color, target):
+        self.pos = pos
+        self.color = color
+        self.radius = 10
+        self.speed = 5.0
+    def update(self, screen):
+        screen_x = math.floor(self.pos.x)
+        screen_y = math.floor(self.pos.y)
+        gfxdraw.aacircle(screen, screen_x, screen_y, self.radius, self.color)
+        pygame.gfxdraw.filled_circle(screen, screen_x, screen_y, self.radius, self.color)
+    def move(self, x, y):
+        pass
+
 class Character():
     def __init__(self, coords, color):
         self.pos = Vector2(coords)
         self.__backup_pos = self.pos
         self.color = color
         self.radius = 20
-        self.speed = 100
+        self.speed = 2.0
         self.input_map = {
             "up" : False,
             "down" : False,
@@ -24,12 +39,13 @@ class Character():
     def update(self, screen):
         screen_x = math.floor(self.pos.x)
         screen_y = math.floor(self.pos.y)
-        pygame.draw.circle(screen, self.color, (screen_x, screen_y), self.radius)
+        gfxdraw.aacircle(screen, screen_x, screen_y, self.radius, self.color)
+        pygame.gfxdraw.filled_circle(screen, screen_x, screen_y, self.radius, self.color)
 
     def wall_collision_response(self):
         self.pos = self.__backup_pos
 
-    def move(self, dt, entity_list):
+    def move(self, dt):
         v = Vector2(0.0,0.0)
         if self.input_map["up"]:
             v.y -= self.speed / dt
@@ -69,7 +85,7 @@ class Player(Character):
                 self.input_map["down"] = False
 
 class Wall():
-    def __init__(self, color, coords):
+    def __init__(self, coords, color):
         self.pos = Vector2(coords)
         self.color = color
         self.width = 40

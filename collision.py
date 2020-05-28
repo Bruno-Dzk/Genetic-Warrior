@@ -1,9 +1,9 @@
 import itertools
 
 class CollisionSystem():
-    def __init__(self, character_list, wall_list):
-        self.character_list = character_list
-        self.wall_list = wall_list
+    def __init__(self, game):
+        self.character_list = game.character_list
+        self.wall_list = game.wall_list
 
     def collided_circle_rect(self, circle, rect):
         circle_dist_x = abs(circle.pos.x - rect.pos.x)

@@ -1,7 +1,7 @@
 import pygame
 from collision import CollisionSystem
 from pygame.time import Clock
-from entities import Player, Wall, Character
+from entities import Player, Wall, Character, Bullet
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -10,6 +10,37 @@ BLUE =      (  0,   0, 255)
 GREEN =     (  0, 255,   0)
 RED =       (255,   0,   0)
 BLACK = (  0,   0,  0)
+
+class Game():
+    def __init__(self, screen):
+        self.screen = screen
+        self.entity_list = []
+        self.character_list = []
+        self.wall_list = []
+    
+    def create_player(self, coords, color):
+        player = Player(coords, color)
+        self.entity_list.append(player)
+        self.character_list.append(player)
+        return player
+
+    def create_npc(self, coords, color):
+        npc = Character(coords, color)
+        self.entity_list.append(npc)
+        self.character_list.append(npc)
+        return npc
+
+    def create_wall(self, coords, color):
+        wall = Wall(coords, color)
+        self.entity_list.append(wall)
+        self.wall_list.append(wall)
+        return wall
+
+    def update(self, dt):
+        for entity in self.entity_list:
+            entity.update(self.screen)
+        for character in self.character_list:
+            character.move(dt)
 
 # define a main function
 def main():
@@ -27,34 +58,25 @@ def main():
     # define a variable to control the main loop
     running = True
 
-    # list of all entities
-    entity_list = []
+    # create an instance of Game class
+    game = Game(screen)
 
-    # list of all walls
-    wall_list = []
-
-    # list of all characters
-    character_list = []
-
-    # collision system
-    collision_system = CollisionSystem(character_list, wall_list)
+    # crate a collision detection system
+    collisionSystem = CollisionSystem(game)
 
     # defining clock
     clock = Clock()
 
     # defining player
-    player = Player((200,200), BLUE)
-    entity_list.append(player)
-    character_list.append(player)
+    player = game.create_player((200,200),BLUE)
 
-    character = Character((500,500), RED)
-    entity_list.append(character)
-    character_list.append(character)
+    character = game.create_npc((500,500),RED)
 
     # defining a wall
-    wall = Wall(BLACK, (400, 300))
-    entity_list.append(wall)
-    wall_list.append(wall)
+    game.create_wall((400,300),BLACK)
+    game.create_wall((440,300),BLACK)
+    game.create_wall((480,300),BLACK)
+    game.create_wall((520,300),BLACK)
      
     # main loop
     while running:
@@ -66,18 +88,15 @@ def main():
                 # change the value to False, to exit the main loop
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                character = Character(pygame.mouse.get_pos(), RED)
-                entity_list.append(character)
-                character_list.append(character)
+                pass
         # set delta time from clock to normalize speeds
-        dt = clock.tick(60)
+        dt = clock.tick(360)
         # drawing
         screen.fill(WHITE)
-        collision_system.update()
-        for entity in entity_list:
-            entity.update(screen)
-        for character in character_list:
-            character.move(dt, character_list)
+       
+        game.update(dt)
+        collisionSystem.update()
+
         pygame.display.flip()
      
      
