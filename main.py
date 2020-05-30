@@ -15,19 +15,23 @@ class Game():
     def __init__(self, screen):
         self.screen = screen
         self.entity_list = []
+        self.mobile_list = []
         self.character_list = []
         self.wall_list = []
+        self.bullet_list = []
     
     def create_player(self, coords, color):
         player = Player(coords, color)
         self.entity_list.append(player)
         self.character_list.append(player)
+        self.mobile_list.append(player)
         return player
 
     def create_npc(self, coords, color):
         npc = Character(coords, color)
         self.entity_list.append(npc)
         self.character_list.append(npc)
+        self.mobile_list.append(npc)
         return npc
 
     def create_wall(self, coords, color):
@@ -36,11 +40,46 @@ class Game():
         self.wall_list.append(wall)
         return wall
 
-    def update(self, dt):
+    def create_bullet(self, coords, target_coords, color):
+        bullet = Bullet(coords, target_coords, color)
+        self.entity_list.append(bullet)
+        self.bullet_list.append(bullet)
+        self.mobile_list.append(bullet)
+        return bullet
+
+    def update(self):
         for entity in self.entity_list:
             entity.update(self.screen)
-        for character in self.character_list:
-            character.move(dt)
+            print(len(self.bullet_list))
+
+    def move_x(self, dt):
+        for mobile in self.mobile_list:
+            mobile.move_x(dt)
+    
+    def move_y(self, dt):
+        for mobile in self.mobile_list:
+            mobile.move_y(dt)
+
+    def cleanup(self):
+        for bullet in self.bullet_list:
+            bullet.check_cleanup((SCREEN_WIDTH,SCREEN_HEIGHT))
+            if bullet.cleanup_needed:
+                self.bullet_list.pop(self.bullet_list.index(bullet))
+                self.entity_list.pop(self.entity_list.index(bullet))
+
+def create_world_borders(game, screen):
+    east = game.create_wall((10,SCREEN_HEIGHT/2),BLACK)
+    west = game.create_wall((SCREEN_WIDTH - 10,SCREEN_HEIGHT/2),BLACK)
+    east.width = 20
+    west.width = 20
+    east.height = SCREEN_HEIGHT
+    west.height = SCREEN_HEIGHT
+    north = game.create_wall((SCREEN_WIDTH/2, 10),BLACK)
+    south = game.create_wall((SCREEN_WIDTH/2, SCREEN_HEIGHT - 10),BLACK)
+    north.height = 20
+    south.height = 20
+    north.width = SCREEN_WIDTH
+    south.width = SCREEN_WIDTH
 
 # define a main function
 def main():
@@ -64,6 +103,8 @@ def main():
     # crate a collision detection system
     collisionSystem = CollisionSystem(game)
 
+    create_world_borders(game, screen)
+
     # defining clock
     clock = Clock()
 
@@ -72,7 +113,7 @@ def main():
 
     character = game.create_npc((500,500),RED)
 
-    # defining a wall
+    # world border walls
     game.create_wall((400,300),BLACK)
     game.create_wall((440,300),BLACK)
     game.create_wall((480,300),BLACK)
@@ -88,17 +129,20 @@ def main():
                 # change the value to False, to exit the main loop
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                pass
+                game.create_bullet(player.pos, pygame.mouse.get_pos(), GREEN)
         # set delta time from clock to normalize speeds
         dt = clock.tick(360)
         # drawing
         screen.fill(WHITE)
        
-        game.update(dt)
+        game.cleanup()
+        game.move_x(dt)
         collisionSystem.update()
+        game.move_y(dt)
+        collisionSystem.update()
+        game.update()
 
         pygame.display.flip()
-     
      
 # run the main function only if this module is executed as the main script
 # (if you import this as a module then nothing is executed)

@@ -4,6 +4,7 @@ class CollisionSystem():
     def __init__(self, game):
         self.character_list = game.character_list
         self.wall_list = game.wall_list
+        self.bullet_list = game.bullet_list
 
     def collided_circle_rect(self, circle, rect):
         circle_dist_x = abs(circle.pos.x - rect.pos.x)
@@ -27,7 +28,13 @@ class CollisionSystem():
         # for x, y in itertools.combinations(self.character_list, 2):
         #     if x.pos.distance_to(y.pos) <= x.radius + y.radius:
         #         collided = True
+        # test character-wall collision
         for character in self.character_list:
             for wall in self.wall_list:
                 if self.collided_circle_rect(character, wall):
                     character.wall_collision_response()
+        # test bullet-wall collision
+        for bullet in self.bullet_list:
+            for wall in self.wall_list:
+                if self.collided_circle_rect(bullet, wall):
+                    bullet.wall_collision_response()
