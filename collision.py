@@ -1,40 +1,52 @@
-import itertools
+"""A module for collision detecting in a pong-type game
 
-class CollisionSystem():
+Contains functions for detecting collisions between two rectangles
+and between a circle and a rectangle.
+Also contains a CollisionSystem class that stores lists of game objects
+and checks the collision between them.
+"""
+def collided_circle_rectangle(circle, rectangle):
+    """Returns true if the passed circle is intersecting with the passed tectangle.
+    """
+    distance_vector = circle.position - rectangle.position
+    if (abs(distance_vector.x) < rectangle.width / 2 + circle.radius
+            and abs(distance_vector.y) < rectangle.height / 2 + circle.radius):
+        return True
+    return False
+
+def collided_2_rectangle(rectangle_a, rectangle_b):
+    """Returns true if the two passed rectangles are intersecting.
+    """
+    distance_x = abs(rectangle_a.position.x - rectangle_b.position.x)
+    distance_y = abs(rectangle_a.position.y - rectangle_b.position.y)
+    if (distance_x < rectangle_a.width / 2  + rectangle_b.width / 2
+            and distance_y < rectangle_a.height / 2 + rectangle_b.height /2):
+        return True
+    return False
+
+class CollisionSystem:
+    """Checks if there is a collision between objects from the lists on the update function.
+
+    Takes a game object as a constructor argument.
+    """
     def __init__(self, game):
-        self.character_list = game.character_list
+        self.paddle_list = game.paddle_list
         self.wall_list = game.wall_list
-        self.bullet_list = game.bullet_list
-
-    def collided_circle_rect(self, circle, rect):
-        circle_dist_x = abs(circle.pos.x - rect.pos.x)
-        circle_dist_y = abs(circle.pos.y - rect.pos.y)
-        
-        if circle_dist_x > rect.width / 2 + circle.radius:
-            return False
-        if circle_dist_y > rect.height / 2 + circle.radius:
-            return False
-
-        if circle_dist_x <= rect.width / 2:
-            return True
-        if circle_dist_y <= rect.height / 2:
-            return True
-
-        corner_distance_sq = (circle_dist_x - rect.width/2)**2 + (circle_dist_y - rect.height/2)**2
-
-        return (corner_distance_sq <= (circle.radius**2))
+        self.ball_list = game.ball_list
 
     def update(self):
-        # for x, y in itertools.combinations(self.character_list, 2):
-        #     if x.pos.distance_to(y.pos) <= x.radius + y.radius:
-        #         collided = True
-        # test character-wall collision
-        for character in self.character_list:
-            for wall in self.wall_list:
-                if self.collided_circle_rect(character, wall):
-                    character.wall_collision_response()
-        # test bullet-wall collision
-        for bullet in self.bullet_list:
-            for wall in self.wall_list:
-                if self.collided_circle_rect(bullet, wall):
-                    bullet.wall_collision_response()
+        """Checks collision between all game objects that can collide with each other.
+
+        If collision occured it calls appropriate response function.
+        """
+        for wall in self.wall_list:
+            for paddle in self.paddle_list:
+                if collided_2_rectangle(paddle, wall):
+                    paddle.wall_collision_response(wall)
+            for ball in self.ball_list:
+                if collided_circle_rectangle(ball, wall):
+                    ball.wall_collision_response()
+        for paddle in self.paddle_list:
+            for ball in self.ball_list:
+                if collided_circle_rectangle(ball, paddle):
+                    ball.paddle_collision_response(paddle)
