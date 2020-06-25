@@ -120,14 +120,14 @@ class Game:
         If on the left side player two gets one point.
         """
         for ball in self.ball_list:
-            if ball.position.x > SCREEN_WIDTH + ball.radius:
+            if ball.position.x > SCREEN_WIDTH - ball.radius:
                 self.score[PLAYER_ONE] += 1
                 self.player_one_scoreboard.update_score(self.score[PLAYER_ONE])
                 ball.cleanup_needed = True
                 self.create_ball((SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2),
                                  (SCREEN_WIDTH, SCREEN_HEIGHT/2),
                                  Colors.BALL_COLOR)
-            if ball.position.x < 0 + ball.radius:
+            if ball.position.x < ball.radius:
                 self.score[PLAYER_TWO] += 1
                 self.player_two_scoreboard.update_score(self.score[PLAYER_TWO])
                 ball.cleanup_needed = True
@@ -166,10 +166,10 @@ def main():
     # initialize the pygame module
     pygame.init()
     # load and set the logo
-    # logo = pygame.image.load("logo32x32.png")
+    #logo = pygame.image.load("logo32x32.png")
     # pygame.display.set_icon(logo)
     pygame.display.set_caption("Pong")
-    pygame.font.init()
+    #pygame.font.init()
     # create a surface on screen that has the size of 240 x 180
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
